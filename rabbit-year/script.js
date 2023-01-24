@@ -1,15 +1,13 @@
 const canvas = document.getElementById("canvas1");
 const canvas2 = document.getElementById("canvas2");
-const clearBtn = document.getElementById("clearBtn");
 
 const ctx = canvas.getContext("2d");
 const ctx2 = canvas2.getContext("2d");
 const particlesArray = [];
-let rabbitParticleArray = [];
-const numberOfRabbitParticles = 1000;
+let rabbitParticlesArray = [];
 let hue = 0;
 
-let maomaomao = [
+let rabbitBox = [
   [296, 39],
   [296, 38],
   [296, 38],
@@ -906,109 +904,41 @@ let maomaomao = [
   [85, 272],
 ];
 
-// https://www.pinterest.com/pin/400187116901580744/
+// default canvas & canvas2 setting
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-ctx.font = "60px Lato";
+ctx.font = "60px Lato bolder";
+ctx.save();
 canvas2.width = 626;
 canvas2.height = 626;
+// ctx2.translate(313 / 2, 313 / 2);
+// ctx2.scale(0.5, 0.5);
+ctx2.save();
 
-// const myImage = new Image();
-// myImage.src = "./rabbit.jpg";
-// let mappedImage = [];
-// myImage.addEventListener("load", function () {
-//   ctx2.drawImage(myImage, 0, 0, canvas2.width, canvas2.height);
-//   const pixels = ctx2.getImageData(0, 0, canvas2.width, canvas2.height);
+window.addEventListener("resize", function () {
+  ctx.restore();
+  ctx2.restore();
+});
 
-//   ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-
-//   for (let y = 0; y < canvas2.height; y++) {
-//     let row = [];
-//     for (let x = 0; x < canvas2.width; x++) {
-//       const red = pixels.data[y * 4 * pixels.width + x * 4];
-//       const green = pixels.data[y * 4 * pixels.width + (x * 4 + 1)];
-//       const blue = pixels.data[y * 4 * pixels.width + (x * 4 + 2)];
-//       const brightness =
-//         red == 239 ? 0 : calculateRelativeBrightness(red, green, blue);
-//       const cell = [brightness];
-//       row.push(cell);
-//     }
-//     mappedImage.push(row);
-//   }
-//   function calculateRelativeBrightness(red, green, blue) {
-//     return (
-//       Math.sqrt(
-//         red * red * 0.299 + green * green * 0.587 + blue * blue * 0.114
-//       ) / 100
-//     );
-//   }
-
-//   class RabbitParticle {
-//     constructor() {
-//       this.x = Math.random() * canvas2.width;
-//       this.y = 0;
-//       this.speed = 0;
-//       this.velocity = Math.random() * 2.5;
-//       this.size = Math.random() * 1.5 + 1;
-//       this.position1 = Math.floor(this.y);
-//       this.position2 = Math.floor(this.x);
-//     }
-//     update() {
-//       this.position1 = Math.floor(this.y);
-//       this.position2 = Math.floor(this.x);
-//       if (
-//         mappedImage[this.position1] &&
-//         mappedImage[this.position1][this.position2]
-//       ) {
-//         this.speed = mappedImage[this.position1][this.position2][0];
-//       }
-//       let movement = 2.5 - this.speed + this.velocity;
-
-//       this.y += movement;
-//       if (this.y >= canvas2.height) {
-//         this.y = 0;
-//         this.x = Math.random() * canvas2.width;
-//       }
-//     }
-//     draw() {
-//       ctx2.beginPath();
-//       ctx2.fillStyle = "rgba(200, 0, 0)";
-//       ctx2.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-//       ctx2.fill();
-//     }
-//   }
-
-//   function animate() {
-//     // ctx2.drawImage(myImage, 0, 0, canvas2.width, canvas2.height);
-//     ctx2.globalAlpha = 0.05;
-//     ctx2.fillStyle = "rgba(100, 0, 0, 0.1)";
-//     ctx2.fillRect(0, 0, canvas2.width, canvas2.height);
-//     ctx2.globalAlpha = 0.2;
-//     for (let i = 0; i < rabbitParticleArray.length; i++) {
-//       rabbitParticleArray[i].update();
-//       ctx.globalAlpha = rabbitParticleArray[i].speed;
-//       rabbitParticleArray[i].draw();
-//     }
-//     requestAnimationFrame(animate);
-//   }
-//   function init() {
-//     for (let i = 0; i < numberOfRabbitParticles; i++) {
-//       rabbitParticleArray.push(new RabbitParticle());
-//     }
-//   }
-//   init();
-//   animate();
-// });
-
+// store mouse events
 const mouse = {
   x: undefined,
   y: undefined,
 };
 
+// store fake horizontal mouse coordinates
+const fakeMouse = {
+  x: undefined,
+  y: undefined,
+};
+
+// boolean to start or stop animation
 const runAnimation = {
   value: true,
 };
+
+// Particle & Rabbits
 
 class Particle {
   constructor(
@@ -1054,12 +984,14 @@ class Rabbit extends Particle {
     this.size = size === 25 ? 25 : Math.random() * size + 1;
   }
   draw() {
-    ctx2.fillStyle = "rgba(255,255,255,0.15)";
+    ctx2.fillStyle = "rgba(255,150,50,0.20)";
     ctx2.beginPath();
     ctx2.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx2.fill();
   }
 }
+
+// init with 1000 particles and rabbitPaticles with size of 10, 15, 25
 
 function init() {
   let size10 = [];
@@ -1068,16 +1000,18 @@ function init() {
   for (let i = 0; i < 1000; i++) {
     particlesArray.push(new Particle());
   }
-  for (let i = 0; i < maomaomao.length; i++) {
-    size10.push(new Rabbit(maomaomao[i][0], maomaomao[i][1], 10));
-    size15.push(new Rabbit(maomaomao[i][0], maomaomao[i][1], 15));
-    size25.push(new Rabbit(maomaomao[i][0], maomaomao[i][1], 25));
+  for (let i = 0; i < rabbitBox.length; i++) {
+    size10.push(new Rabbit(rabbitBox[i][0], rabbitBox[i][1], 10));
+    size15.push(new Rabbit(rabbitBox[i][0], rabbitBox[i][1], 15));
+    size25.push(new Rabbit(rabbitBox[i][0], rabbitBox[i][1], 25));
 
-    rabbitParticleArray.push(size10);
-    rabbitParticleArray.push(size15);
-    rabbitParticleArray.push(size25);
+    rabbitParticlesArray.push(size10);
+    rabbitParticlesArray.push(size15);
+    rabbitParticlesArray.push(size25);
   }
 }
+
+init();
 
 function handleParticles() {
   for (let i = 0; i < particlesArray.length; i++) {
@@ -1091,37 +1025,6 @@ function handleParticles() {
   }
 }
 
-function handleRabbit(size) {
-  let i = 0;
-  let intervalID;
-
-  intervalID = setInterval(function () {
-    rabbitParticleArray[size][i].draw();
-    i++;
-    if (i === rabbitParticleArray[size].length) {
-      clearInterval(intervalID);
-    }
-  }, 2);
-}
-
-function drawRabbit() {
-  handleRabbit(0);
-  setTimeout(() => {
-    handleRabbit(1);
-  }, 4500);
-  setTimeout(() => {
-    handleRabbit(2);
-  }, 9000);
-}
-
-window.addEventListener("resize", function () {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  canvas2.width = 626;
-  canvas2.height = 626;
-});
-
 function animate() {
   if (runAnimation.value) {
     ctx.fillStyle = "rgba(100, 0, 0, 0.01)";
@@ -1134,97 +1037,135 @@ function animate() {
   }
 }
 
-init();
 animate();
+
+// draw randomParticles and horizontal particles
+
+function createRandomParticle() {
+  particlesArray.push(
+    new Particle(
+      Math.random() * canvas.width,
+      Math.random() * canvas.height,
+      10,
+      5
+    )
+  );
+}
+
+var horizontalParticlesId;
+
+function setParticle() {
+  let x = canvas.width - 200;
+  let y = canvas.height / 3; // first line y coordinate
+  let direction = "backward";
+  horizontalParticlesId = setInterval(function () {
+    createRandomParticle();
+
+    fakeMouse.x = x;
+    fakeMouse.y = y;
+
+    particlesArray.push(new Particle(fakeMouse.x, fakeMouse.y));
+
+    if (direction == "backward" && x > 200) {
+      x -= 2;
+    }
+
+    if (x <= 200) {
+      direction = "forward";
+      y = (canvas.height * 2) / 3; // second line coordinate
+    }
+
+    if (direction == "forward") {
+      x += 2;
+    }
+
+    if (direction == "forward" && x > canvas.width - 200) {
+      clearInterval(horizontalParticlesId); // finish creating horizontalParticles
+    }
+  }, 3);
+}
+
 setParticle();
 
-function handleMouseMove(event) {
-  mouse.x = event.x;
-  mouse.y = event.y;
+// mousedown events create particles with mouse.x and mouse.y
+
+function handleMouseDown(event) {
+  mouse.x = event.pageX;
+  mouse.y = event.pageY;
   for (let i = 0; i < 50; i++) {
     particlesArray.push(new Particle(mouse.x, mouse.y));
   }
 }
 
-let mousedown = false;
-let mao = [];
-
-// function handleCanvas2Move(event) {
-//   if (mousedown) {
-//     mao.push([event.offsetX, event.offsetY]);
-//     ctx2.fillStyle = "rgba(0,0,0,1)";
-//     ctx2.beginPath();
-//     ctx2.arc(event.offsetX, event.offsetY, 10, 0, Math.PI * 2);
-//     ctx2.fill();
-//   }
-// }
-
-// canvas2.addEventListener("mousedown", function (event) {
-//   console.log(event);
-//   mousedown = true;
-// });
-// canvas2.addEventListener("mouseup", function () {
-//   mousedown = false;
-// });
-// canvas2.addEventListener("mousemove", handleCanvas2Move);
-
-clearBtn.addEventListener("click", function () {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-});
-
-var intervalID;
-
-function setParticle() {
-  let x = canvas.width - 200;
-  let y = canvas.height / 3;
-  let direction = "backward";
-  intervalID = setInterval(function () {
-    mouse.x = x;
-    mouse.y = y;
-
-    if (direction == "backward" && x > 200) {
-      x -= 2;
-    }
-    if (x <= 200) {
-      direction = "forward";
-      y = (canvas.height * 2) / 3;
-    }
-    if (direction == "forward") {
-      x += 2;
-    }
-    if (direction == "forward" && x > canvas.width - 200) {
-      clearInterval(intervalID);
-    }
-    createRandomParticle();
-    particlesArray.push(new Particle(mouse.x, mouse.y));
-  }, 3);
-}
-function stopInterval() {
-  clearInterval(intervalID);
-}
-
-window.addEventListener("mousedown", handleMouseMove);
+window.addEventListener("mousedown", handleMouseDown);
 canvas.addEventListener("click", function () {
   // runAnimation.value = !runAnimation.value;
-
   if (runAnimation.value) {
-    window.addEventListener("mousedown", handleMouseMove);
+    window.addEventListener("mousedown", handleMouseDown);
     animate();
   } else {
-    window.removeEventListener("mousedown", handleMouseMove);
+    window.removeEventListener("mousedown", handleMouseDown);
   }
 });
 
-function createRandomParticle() {
-  particlesArray.push(
-    new Particle(
-      (x = Math.random() * canvas.width),
-      (y = Math.random() * canvas.height),
-      (size = 10),
-      (speed = 3)
-    )
-  );
+// use setInterval to darw rabbit continueslly
+
+function handleRabbit(size) {
+  let i = 0;
+  let intervalID;
+
+  intervalID = setInterval(function () {
+    rabbitParticlesArray[size][i].draw();
+    i++;
+    if (i === rabbitParticlesArray[size].length) {
+      clearInterval(intervalID);
+    }
+  }, 2);
+}
+
+// use setTimeout to draw size 10, 15, 25. They are respectively store in rabbtParticlesArray[0], [1], [2]
+
+function drawRabbit() {
+  handleRabbit(0);
+  setTimeout(() => {
+    handleRabbit(1);
+  }, 4500);
+  setTimeout(() => {
+    handleRabbit(2);
+  }, 9000);
 }
 
 setTimeout(drawRabbit, 7000);
+
+// close animation after 30 secs
+
+function toggleRunAnimation() {
+  runAnimation.value = !runAnimation.value;
+}
+
+setTimeout(toggleRunAnimation, 30000);
+
+/* draw rabbitBox
+
+// let mao = [];  // collect canvas2 drawing
+// let mousedown = false; // state for canvas2 drawing
+
+function handleCanvas2Move(event) {
+  if (mousedown) {
+    mao.push([event.offsetX, event.offsetY]);
+    ctx2.fillStyle = "rgba(0,0,0,1)";
+    ctx2.beginPath();
+    ctx2.arc(event.offsetX, event.offsetY, 10, 0, Math.PI * 2);
+    ctx2.fill();
+  }
+}
+
+canvas2.addEventListener("mousedown", function (event) {
+  console.log(event);
+  mousedown = true;
+});
+canvas2.addEventListener("mouseup", function () {
+  mousedown = false;
+});
+canvas2.addEventListener("mousemove", handleCanvas2Move);
+*/
