@@ -912,8 +912,8 @@ ctx.font = "60px Lato bolder";
 ctx.save();
 canvas2.width = 626;
 canvas2.height = 626;
-// ctx2.translate(313 / 2, 313 / 2);
-// ctx2.scale(0.5, 0.5);
+ctx2.translate(313 / 2, 313 / 2);
+ctx2.scale(0.5, 0.5);
 ctx2.save();
 
 window.addEventListener("resize", function () {
@@ -1027,7 +1027,7 @@ function handleParticles() {
 
 function animate() {
   if (runAnimation.value) {
-    ctx.fillStyle = "rgba(100, 0, 0, 0.01)";
+    ctx.fillStyle = "rgba(150, 0, 0, 0.01)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     handleParticles();
     hue++;
